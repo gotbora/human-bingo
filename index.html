@@ -14,7 +14,7 @@
 .overlay[hidden]{display:none}
 .sheet{background:#fff;border-radius:24px;padding:28px;width:min(92vw,480px);max-height:90vh;overflow:auto;box-shadow:var(--shadow);color:var(--ink)}.sheet .eyebrow{margin:0 0 4px}.sheet h2{font-size:23px;line-height:1.2;margin:4px 0 2px}.sheet label{display:block;font-weight:800;font-size:15px;margin:22px 0 0}.sheet input{width:100%;display:block;margin-top:10px;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:17px}.sheet .dialog-actions{display:flex;justify-content:space-between;gap:12px;margin-top:24px}.sheet .dialog-actions button{flex:1;padding:16px 18px;font-size:16px;border-radius:12px}.sheet .primary{border:0;background:var(--violet);color:#fff;font-weight:850}.sheet .quiet{border:1px solid var(--line);background:#fff;color:var(--ink)}.sheet .dialog-close{position:absolute;top:14px;right:14px;float:none}.sheet{position:relative;padding:30px}.menu-sheet .menu-action{padding:18px 6px;font-size:16px}.menu-sheet .danger-link{margin-top:20px}
 .board{grid-auto-rows:1fr}.square{aspect-ratio:.72;padding:8px 6px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;min-height:0;overflow:hidden}
-.square-prompt{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;font-weight:800;overflow:hidden;margin:0;overflow-wrap:break-word;word-break:break-word;hyphens:auto}
+.square-prompt{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;font-weight:800;overflow:hidden;margin:0;overflow-wrap:normal;word-break:normal;hyphens:manual}
 .square-name{font-size:clamp(9px,2.4vw,12px);font-weight:850;border-top:1px solid #d9d4e5;padding-top:4px;margin-top:0;flex:0 0 auto;width:100%}
 .square.done{background:var(--lav)}
 .square.free{justify-content:center}
@@ -94,6 +94,15 @@
     </div>
   </div>
 
+    <div id="askDialog" class="overlay" hidden>
+    <div class="sheet">
+      <button class="dialog-close" id="askClose" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">Heads up</p>
+      <h2 id="askText"></h2>
+      <label id="askLabelWrap" hidden>Last name <input id="askInput" maxlength="40" placeholder="Last name" autocomplete="off"></label>
+      <div class="dialog-actions"><button id="askNo" type="button" class="quiet"></button><button id="askYes" type="button" class="primary">OK</button></div>
+    </div>
+  </div>
   <div id="bingoToast" class="bingo-toast" role="status" hidden><span>BINGO!</span><small>Five in a row — download and share your winning card.</small><button id="toastDownload">Download card</button></div>
   <canvas id="exportCanvas" hidden></canvas>
   <script>
@@ -154,7 +163,7 @@ const $=id=>document.getElementById(id);
 function loadState(){try{return JSON.parse(localStorage.getItem(KEY))}catch{return null}}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}const POOL=[...new Set(cards.flat().filter(p=>p!=='FREE SPACE'))];function makePrompts(){const pick=shuffle([...POOL]).slice(0,24);pick.splice(12,0,'FREE SPACE');return pick}function createState(name){return{name:name.trim(),prompts:makePrompts(),entries:Array(25).fill(''),created:new Date().toISOString(),id:crypto.randomUUID?.().slice(0,8)||Math.random().toString(36).slice(2,10)}}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function fitText(el){let sz=16;el.style.fontSize=sz+'px';let g=48;while(g-->0&&sz>7&&(el.scrollHeight>el.clientHeight+0.5||el.scrollWidth>el.clientWidth+0.5)){sz-=0.5;el.style.fontSize=sz+'px';}}function fitSquares(){document.querySelectorAll('#board .square-prompt').forEach(fitText);}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function fitText(el){let sz=16;el.style.fontSize=sz+'px';let g=64;while(g-->0&&sz>6&&(el.scrollHeight>el.clientHeight+0.5||el.scrollWidth>el.clientWidth+0.5)){sz-=0.5;el.style.fontSize=sz+'px';}}function fitSquares(){document.querySelectorAll('#board .square-prompt').forEach(fitText);}
 function init(){
   if(state&&!Array.isArray(state.prompts)){state.prompts=(typeof state.card==='number'&&cards[state.card])?cards[state.card].slice():makePrompts();save()}
   if(!state){$('welcome').hidden=false}else render();
@@ -177,7 +186,7 @@ function render(){
   const won=wins.length>0;if(won&&!lastWon){$('bingoToast').hidden=false;setTimeout(()=>{$('bingoToast').hidden=true},9000)}lastWon=won;requestAnimationFrame(fitSquares);
 }
 function openEntry(i){activeIndex=i;$('promptText').textContent=state.prompts[i];$('entryName').value=state.entries[i]||'';openOverlay('entryDialog');setTimeout(()=>$('entryName').focus(),120)}
-function saveEntry(){const value=$('entryName').value.trim();if(!value){$('entryName').focus();return}state.entries[activeIndex]=value;save();closeOverlay('entryDialog');render()}
+function nrm(x){return x.trim().toLowerCase().replace(/\s+/g,' ')}function dupIndex(v){const n=nrm(v);return state.entries.findIndex((e,i)=>i!==activeIndex&&e&&nrm(e)===n)}function ask(text,o){o=o||{};return new Promise(res=>{$('askText').textContent=text;$('askYes').textContent=o.yes||'OK';const nob=$('askNo');nob.textContent=o.no||'';nob.hidden=!o.no;const lw=$('askLabelWrap');lw.hidden=!o.input;const inp=$('askInput');if(o.input)inp.value='';openOverlay('askDialog');if(o.input)setTimeout(()=>inp.focus(),120);const fin=v=>{closeOverlay('askDialog');$('askYes').onclick=nob.onclick=$('askClose').onclick=null;res(v)};$('askYes').onclick=()=>fin(o.input?(inp.value.trim().replace(/\s+/g,' ')||null):true);nob.onclick=()=>fin(false);$('askClose').onclick=()=>fin(false);})}async function saveEntry(){let value=$('entryName').value.trim().replace(/\s+/g,' ');if(!value){$('entryName').focus();return}if(dupIndex(value)>-1){const diff=await ask(`You've already used "${value}" on another square. Is this a different person with the same name?`,{yes:'Different person',no:'Same person'});if(!diff){await ask('Each square needs a different person — please find someone new.',{yes:'Got it'});$('entryName').focus();return}if(!value.includes(' ')){const last=await ask('Same first name! Add their last name to tell them apart:',{yes:'Add',no:'Cancel',input:true});if(!last){$('entryName').focus();return}value=value+' '+last;}if(dupIndex(value)>-1){await ask('That full name is already used — add a distinguishing detail (e.g., a last initial).',{yes:'OK'});$('entryName').value=value;$('entryName').focus();return}}state.entries[activeIndex]=value;save();closeOverlay('entryDialog');render()}
 function getWinningLines(){const lines=[];for(let r=0;r<5;r++)lines.push([0,1,2,3,4].map(c=>r*5+c));for(let c=0;c<5;c++)lines.push([0,1,2,3,4].map(r=>r*5+c));lines.push([0,6,12,18,24],[4,8,12,16,20]);return lines.filter(line=>line.every(i=>i===12||state.entries[i]))}
 function wrap(ctx,text,max){const words=text.split(' '),lines=[];let line='';for(const w of words){const test=line?line+' '+w:w;if(ctx.measureText(test).width>max&&line){lines.push(line);line=w}else line=test}if(line)lines.push(line);return lines}
 function makeCanvas(){
