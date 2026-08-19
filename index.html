@@ -12,15 +12,15 @@
 
 .overlay{position:fixed;inset:0;z-index:30;background:#100a38aa;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px}
 .overlay[hidden]{display:none}
-.sheet{background:#fff;border-radius:24px;padding:28px;width:min(92vw,480px);max-height:90vh;overflow:auto;box-shadow:var(--shadow);color:var(--ink)}
-.board{grid-auto-rows:1fr}.square{aspect-ratio:1;padding:7px 5px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;min-height:0;overflow:hidden}
+.sheet{background:#fff;border-radius:24px;padding:28px;width:min(92vw,480px);max-height:90vh;overflow:auto;box-shadow:var(--shadow);color:var(--ink)}.sheet .eyebrow{margin:0 0 4px}.sheet h2{font-size:23px;line-height:1.2;margin:4px 0 2px}.sheet label{display:block;font-weight:800;font-size:15px;margin:22px 0 0}.sheet input{width:100%;display:block;margin-top:10px;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:17px}.sheet .dialog-actions{display:flex;justify-content:space-between;gap:12px;margin-top:24px}.sheet .dialog-actions button{flex:1;padding:16px 18px;font-size:16px;border-radius:12px}.sheet .primary{border:0;background:var(--violet);color:#fff;font-weight:850}.sheet .quiet{border:1px solid var(--line);background:#fff;color:var(--ink)}.sheet .dialog-close{position:absolute;top:14px;right:14px;float:none}.sheet{position:relative;padding:30px}.menu-sheet .menu-action{padding:18px 6px;font-size:16px}.menu-sheet .danger-link{margin-top:20px}
+.board{grid-auto-rows:1fr}.square{aspect-ratio:.72;padding:8px 6px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;min-height:0;overflow:hidden}
 .square-prompt{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.15;font-weight:800;overflow:hidden;margin:0}
 .square-name{font-size:clamp(9px,2.4vw,12px);font-weight:850;border-top:1px solid #d9d4e5;padding-top:4px;margin-top:0;flex:0 0 auto;width:100%}
 .square.done{background:var(--lav)}
 .square.free{justify-content:center}
 .square.free .square-prompt{font-size:clamp(12px,3.4vw,17px);font-weight:950}
 .free-logo{width:74%;height:60%;display:block}
-@media(min-width:600px){.square{padding:12px 9px}.square-name{font-size:12px}}
+@media(min-width:600px){.square{padding:12px 9px;aspect-ratio:.85}.square-name{font-size:12px}}
 
 </style>
 <style>
