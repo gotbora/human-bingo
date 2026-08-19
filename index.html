@@ -89,7 +89,6 @@
       <button class="dialog-close" id="menuClose" type="button" aria-label="Close">×</button>
       <p class="eyebrow">Card tools</p><h2>Keep or share your progress</h2>
       <button id="shareButton" type="button" class="menu-action">Send my card to admin <span>↗</span></button>
-      <button id="downloadButton" type="button" class="menu-action">Download card as PNG <span>↓</span></button>
       <button id="resetButton" type="button" class="danger-link">Reset my card</button>
     </div>
   </div>
@@ -103,7 +102,7 @@
       <div class="dialog-actions"><button id="askNo" type="button" class="quiet"></button><button id="askYes" type="button" class="primary">OK</button></div>
     </div>
   </div>
-  <div id="bingoToast" class="bingo-toast" role="status" hidden><span>BINGO!</span><small>Five in a row — download and share your winning card.</small><button id="toastDownload">Download card</button></div>
+  <div id="bingoToast" class="bingo-toast" role="status" hidden><span>BINGO!</span><small>Five in a row! Save your winning card and send it to the admin.</small><button id="toastDownload">Save / send my card</button></div>
   <canvas id="exportCanvas" hidden></canvas>
   <script>
 const cards = [
@@ -172,7 +171,7 @@ function init(){
   $('menuButton').onclick=()=>openOverlay('menuDialog');
   $('saveEntry').onclick=saveEntry;$('entryName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveEntry()}};$('entryClose').onclick=()=>closeOverlay('entryDialog');$('menuClose').onclick=()=>closeOverlay('menuDialog');[ 'entryDialog','menuDialog'].forEach(id=>{$(id).onclick=e=>{if(e.target===$(id))closeOverlay(id)}});
   $('clearEntry').onclick=()=>{state.entries[activeIndex]='';save();closeOverlay('entryDialog');render()};
-  $('downloadButton').onclick=downloadCard;$('toastDownload').onclick=downloadCard;$('shareButton').onclick=shareCard;
+  $('toastDownload').onclick=shareCard;$('shareButton').onclick=shareCard;
   $('resetButton').onclick=()=>{if(confirm('Reset this card and erase all names?')){localStorage.removeItem(KEY);location.reload()}};
   if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
   let _rt;window.addEventListener('resize',()=>{clearTimeout(_rt);_rt=setTimeout(fitSquares,120)});if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitSquares);
